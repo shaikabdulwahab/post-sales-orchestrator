@@ -1,38 +1,37 @@
 package com.mod.cx.post_sales_orchestrator.service.base;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.jooq.DAO;
+import org.jooq.TableRecord;
 
 import java.util.List;
 import java.util.Optional;
 
-public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
+public abstract class BaseServiceImpl<R extends TableRecord<R>, P, ID> implements BaseService<P, ID> {
 
-    protected abstract JpaRepository<T, ID> getRepository();
+    protected abstract DAO<R, P, ID> getDao();
 
     @Override
-    public T save(T entity) {
-        return getRepository().save(entity);
+    public void insert(P entity) {
+        getDao().insert(entity);
     }
 
     @Override
-    public Optional<T> findById(ID id) {
-        return getRepository().findById(id);
+    public void update(P entity) {
+        getDao().update(entity);
     }
 
     @Override
-    public List<T> findAll() {
-        return getRepository().findAll();
+    public Optional<P> findById(ID id) {
+        return Optional.ofNullable(getDao().findById(id));
     }
 
     @Override
-    public Page<T> findAll(Pageable pageable) {
-        return getRepository().findAll(pageable);
+    public List<P> findAll() {
+        return getDao().findAll();
     }
 
     @Override
     public void deleteById(ID id) {
-        getRepository().deleteById(id);
+        getDao().deleteById(id);
     }
 }
