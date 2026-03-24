@@ -67,9 +67,13 @@ public class ProjectService extends BaseServiceImpl<ProjectRecord, Project, Long
     }
 
     public void deletePhase(Long id) {
-        dsl.deleteFrom(PHASE)
+        int deletedRows = dsl.deleteFrom(PHASE)
                 .where(PHASE.ID.eq(id))
                 .execute();
+
+        if (deletedRows == 0) {
+            throw new RuntimeException("Phase not found");
+        }
     }
 
     public Phase updatePhase(Long id, PhaseRequest request) {
