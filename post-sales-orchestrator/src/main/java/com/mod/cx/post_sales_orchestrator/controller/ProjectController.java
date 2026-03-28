@@ -94,30 +94,6 @@ public class ProjectController extends BaseController<Project, Long> {
         }
     }
 
-    // --- Sample API for uploading a file and getting a URL back ---
-    @PostMapping("/upload-logo")
-    public ResponseEntity<?> uploadProjectLogo(@RequestParam("file") MultipartFile file, 
-                                               @RequestParam("projectId") String projectId) {
-        try {
-            // 1. Upload to ImageKit (reusing your existing ImageKitService)
-            Map<String, String> uploadResult = imageKitService.uploadPrivateAsset(file, projectId, "project-logos");
-            String filePath = uploadResult.get("filePath");
-
-            // 2. Generate a secure, temporary URL for immediate viewing (optional, depends on your use case)
-            String temporaryUrl = imageKitService.generateSecureUrl(filePath);
-
-            // 3. Return the data to the client
-            // (In a real scenario, you'd likely call projectService to save `filePath` to the DB here)
-            return ResponseEntity.ok(Map.of(
-                "message", "File uploaded successfully",
-                "filePath", filePath,
-                "url", temporaryUrl 
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Failed to upload file: " + e.getMessage());
-        }
-    }
-
     // Update to accept both JSON body for basic info and MultiPartFiles for logos
     @PostMapping(value = "/req", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createRequest(
