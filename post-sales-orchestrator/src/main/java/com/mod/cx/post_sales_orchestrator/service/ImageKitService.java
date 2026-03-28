@@ -25,6 +25,20 @@ public class ImageKitService {
         imageKit.setConfig(config);
     }
 
+    public String uploadAndGetUrl(MultipartFile file, String userId, String category) throws Exception {
+        String folderPath = String.format("head/user_%s/%s", userId, category);
+
+        FileCreateRequest request = new FileCreateRequest(file.getBytes(), file.getOriginalFilename());
+        request.setFolder(folderPath);
+        request.setUseUniqueFileName(true);
+        request.setPrivateFile(true);
+
+        Result result = imageKit.upload(request);
+        
+        // Immediately generate the secure URL after upload
+        return generateSecureUrl(result.getFilePath());
+    }
+
     public Map<String, String> uploadPrivateAsset(MultipartFile file, String userId, String category) throws Exception{
 
         String folderPath = String.format("head/user_%s/%s",userId,category);
