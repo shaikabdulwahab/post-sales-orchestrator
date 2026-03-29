@@ -2,7 +2,6 @@ package com.mod.cx.post_sales_orchestrator.controller;
 
 import com.mod.cx.post_sales_orchestrator.controller.base.BaseController;
 
-import com.mod.cx.post_sales_orchestrator.dto.PhaseRequest;
 import com.mod.cx.post_sales_orchestrator.dto.ProjectDTO;
 import com.mod.cx.post_sales_orchestrator.jooq.tables.pojos.Project;
 import com.mod.cx.post_sales_orchestrator.service.ImageKitService;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -29,26 +27,6 @@ public class ProjectController extends BaseController<Project, Long> {
         return projectService;
     }
 
-    @PostMapping("/phase")
-    public ResponseEntity<?> createPhase(@RequestBody PhaseRequest request) {
-
-        try {
-            projectService.createPhase(request);
-            return ResponseEntity.ok("Phase created successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to create phase " + e.getMessage());
-        }
-
-    }
-
-    @GetMapping("/phase/{id}")
-    public ResponseEntity<?> getPhase(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(projectService.getPhase(id));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to get phase " + e.getMessage());
-        }
-    }
 
     @GetMapping("/{projectId}/phases")
     public  ResponseEntity<?> getProjectPhases(
@@ -60,37 +38,6 @@ public class ProjectController extends BaseController<Project, Long> {
             return ResponseEntity.ok(projectService.getProjectPhases(projectId, page, size));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to get project phases " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/phase/{id}")
-    public ResponseEntity<?> deletePhase(@PathVariable Long id) {
-
-        try {
-            projectService.deletePhase(id);
-            return ResponseEntity.ok("Phase deleted successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to delete phase " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/phase/{id}")
-    public ResponseEntity<?> updatePhase(@PathVariable Long id, @RequestBody PhaseRequest request) {
-
-        try {
-            return ResponseEntity.ok(projectService.updatePhase(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update phase " + e.getMessage());
-        }
-    }
-
-    @PatchMapping("/phase/{id}")
-    public ResponseEntity<?> updatePhasePartial(@PathVariable Long id, @RequestBody PhaseRequest request) {
-
-        try {
-            return ResponseEntity.ok(projectService.updatePhase(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update phase " + e.getMessage());
         }
     }
 
