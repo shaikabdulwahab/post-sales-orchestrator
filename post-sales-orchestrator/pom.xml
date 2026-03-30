@@ -170,6 +170,21 @@
                             <name>org.jooq.meta.mysql.MySQLDatabase</name>
                             <includes>.*</includes>
                             <excludes></excludes>
+                            <forcedTypes>
+                                <forcedType>
+                                    <!-- The Java type you want to use in your code -->
+                                    <userType>java.util.List&lt;String&gt;</userType>
+
+                                    <!-- The converter that handles the JSON to List<String> logic -->
+                                    <converter>com.mod.cx.post_sales_orchestrator.jooq.binding.JsonToStringListConvertor</converter>
+
+                                    <!-- A regex to match the column(s) this applies to -->
+                                    <includeExpression>.*\.conditions</includeExpression>
+
+                                    <!-- The underlying database column type -->
+                                    <includeTypes>JSON</includeTypes>
+                                </forcedType>
+                            </forcedTypes>
                             <inputSchema>post_sales_db</inputSchema>
                         </database>
                         <generate>
