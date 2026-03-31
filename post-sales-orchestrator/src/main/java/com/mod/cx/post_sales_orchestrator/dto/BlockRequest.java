@@ -7,16 +7,13 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TowerRequest {
+public class BlockRequest {
 
     private Long phaseId;
     private String name;
-    private Integer totalFloors;
-    private Integer maxUnitsPerFloor;
     private Boolean oc;
     private ReraStatus reraStatus;
     private ConstructionStatus constructionStatus;
     private List<String> inventoryType;
     private List<String> conditions;
-
 }

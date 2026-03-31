@@ -11,7 +11,7 @@ public abstract class BaseServiceImpl<R extends TableRecord<R>, P, ID> implement
     protected abstract DAO<R, P, ID> getDao();
 
     @Override
-    public void insert(P entity) {
+    public void create(P entity) {
         getDao().insert(entity);
     }
 
