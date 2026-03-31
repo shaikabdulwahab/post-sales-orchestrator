@@ -179,7 +179,7 @@
                                     <converter>com.mod.cx.post_sales_orchestrator.jooq.binding.JsonToStringListConvertor</converter>
 
                                     <!-- A regex to match the column(s) this applies to -->
-                                    <includeExpression>.*\.conditions</includeExpression>
+                                    <includeExpression>(.*\.conditions|.*\.inventory_type)</includeExpression>
 
                                     <!-- The underlying database column type -->
                                     <includeTypes>JSON</includeTypes>

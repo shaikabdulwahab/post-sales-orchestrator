@@ -22,7 +22,7 @@ public class PhaseController extends BaseController<Phase, Long> {
         return phaseService;
     }
 
-    @PostMapping("/phase")
+    @PostMapping("/req")
     public ResponseEntity<?> createPhase(@RequestBody PhaseRequest request) {
 
         try {
@@ -34,43 +34,25 @@ public class PhaseController extends BaseController<Phase, Long> {
 
     }
 
-    @GetMapping("/phase/{id}")
-    public ResponseEntity<?> getPhase(@PathVariable Long id) {
+    @GetMapping("/{phaseId}/towers")
+    public ResponseEntity<?> getPhaseTowers(@PathVariable Long phaseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+
         try {
-            return ResponseEntity.ok(phaseService.getPhase(id));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to get phase " + e.getMessage());
+            return ResponseEntity.ok(phaseService.getPhaseTowers(phaseId, page, size));
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to get phase towers " + e.getMessage());
         }
     }
 
-    @DeleteMapping("/phase/{id}")
-    public ResponseEntity<?> deletePhase(@PathVariable Long id) {
+    @GetMapping("/{phaseId}/blocks")
+    public ResponseEntity<?> getPhaseBlocks(@PathVariable Long phaseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
 
         try {
-            phaseService.deletePhase(id);
-            return ResponseEntity.ok("Phase deleted successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to delete phase " + e.getMessage());
+            return ResponseEntity.ok(phaseService.getPhaseBlocks(phaseId, page, size));
         }
-    }
-
-    @PutMapping("/phase/{id}")
-    public ResponseEntity<?> updatePhase(@PathVariable Long id, @RequestBody PhaseRequest request) {
-
-        try {
-            return ResponseEntity.ok(phaseService.updatePhase(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update phase " + e.getMessage());
-        }
-    }
-
-    @PatchMapping("/phase/{id}")
-    public ResponseEntity<?> updatePhasePartial(@PathVariable Long id, @RequestBody PhaseRequest request) {
-
-        try {
-            return ResponseEntity.ok(phaseService.updatePhase(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update phase " + e.getMessage());
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to get phase blocks " + e.getMessage());
         }
     }
 
