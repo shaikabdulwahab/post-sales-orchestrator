@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface BaseService<T, ID> {
 
-    void insert(T entity);
+    void create(T entity);
 
     void update(T entity);
 

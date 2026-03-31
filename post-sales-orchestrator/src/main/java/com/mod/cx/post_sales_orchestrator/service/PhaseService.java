@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DAO;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -86,11 +87,19 @@ public class PhaseService extends BaseServiceImpl<PhaseRecord, Phase, Long> {
         }
     }
 
+    @Transactional
     public Phase updatePhase(Long id, PhaseRequest request) {
         PhaseRecord phase = dsl.selectFrom(PHASE)
                 .where(PHASE.ID.eq(id))
                 .fetchOptional()
                 .orElseThrow(() -> new RuntimeException("Phase not found"));
+
+        String projectType = dsl.selectFrom(PROJECT)
+                .where(PROJECT.ID.eq(phase.getProjectId()))
+                .fetchOptional()
+                .orElseThrow(() -> new RuntimeException("Project not found"))
+                .getProjectType();
+
 
         if (request.getName() != null && !request.getName().equalsIgnoreCase(phase.getName())) {
 
@@ -107,6 +116,35 @@ public class PhaseService extends BaseServiceImpl<PhaseRecord, Phase, Long> {
         }
         if(request.getReraType() != null) phase.setReraType(request.getReraType());
         if(request.getOc() != null) phase.setOc(request.getOc());
+        if(phase.getReraType().equalsIgnoreCase("phasewise"))
+        {
+            if(phase.getReraStatus().equalsIgnoreCase("not_approved") && request.getReraStatus().equalsIgnoreCase("approved"))
+            {
+                if(projectType.equalsIgnoreCase("residential"))
+                {
+                    String productType = dsl.selectFrom(PROJECT)
+                            .where(PROJECT.ID.eq(phase.getProjectId()))
+                            .fetchOptional()
+                            .orElseThrow(() -> new RuntimeException("Project not found"))
+                            .getProductType();
+
+                    if(productType.equalsIgnoreCase("apartment"))
+                    {
+                        dsl.update(TOWER)
+                                .set(TOWER.RERA_STATUS, "APPROVED")
+                                .where(TOWER.PHASE_ID.eq(id))
+                                .execute();
+                    }
+                    else if(productType.equalsIgnoreCase("villament"))
+                    {
+                        dsl.update(BLOCK)
+                                .set(BLOCK.RERA_STATUS, "APPROVED")
+                                .where(BLOCK.PHASE_ID.eq(id))
+                                .execute();
+                    }
+                }
+            }
+        }
         if(request.getReraStatus() != null) phase.setReraStatus(request.getReraStatus());
 
         phase.store();

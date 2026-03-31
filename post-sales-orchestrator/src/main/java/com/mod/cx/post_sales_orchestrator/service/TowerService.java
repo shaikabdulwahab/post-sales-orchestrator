@@ -12,6 +12,7 @@ import org.jooq.types.UByte;
 import org.jooq.types.UShort;
 import org.springframework.stereotype.Service;
 
+import static com.mod.cx.post_sales_orchestrator.jooq.Tables.PHASE;
 import static com.mod.cx.post_sales_orchestrator.jooq.Tables.TOWER;
 
 @Service
@@ -37,14 +38,31 @@ public class TowerService extends BaseServiceImpl<TowerRecord, Tower, Long> {
             throw new RuntimeException("Tower already exists");
         }
 
+        String phaseReraType = dsl.selectFrom(PHASE)
+                .where(PHASE.ID.eq(request.getPhaseId()))
+                .fetchOptional()
+                .orElseThrow(() -> new RuntimeException("Phase not found"))
+                .getReraType();
+
         TowerRecord tower = dsl.newRecord(TOWER);
         tower.setPhaseId(request.getPhaseId());
         tower.setName(request.getName());
         tower.setTotalFloors(UShort.valueOf(request.getTotalFloors()));
         tower.setMaxUnitsPerFloor(UByte.valueOf(request.getMaxUnitsPerFloor()));
         tower.setOc(request.getOc() ? (byte) 1 : (byte) 0);
-        if(request.getReraStatus() != null) tower.setReraStatus(request.getReraStatus());
-        tower.setConstructionStatus(request.getConstructionStatus());
+        if(phaseReraType.equalsIgnoreCase("phasewise")){
+            String phaseReraStatus = dsl.selectFrom(PHASE)
+                    .where(PHASE.ID.eq(request.getPhaseId()))
+                    .fetchOptional()
+                    .orElseThrow(() -> new RuntimeException("Phase not found"))
+                    .getReraStatus();
+            if(phaseReraStatus.equalsIgnoreCase("approved"))
+                tower.setReraStatus("approved");
+        }
+        else {
+            tower.setReraStatus(String.valueOf(request.getReraStatus()));
+        }
+        tower.setConstructionStatus(String.valueOf(request.getConstructionStatus()));
         tower.setInventoryType(request.getInventoryType());
         tower.setConditions(request.getConditions());
 
@@ -75,12 +93,24 @@ public class TowerService extends BaseServiceImpl<TowerRecord, Tower, Long> {
                 .fetchOptional()
                 .orElseThrow(() -> new RuntimeException("Tower not found"));
 
+        String phaseReraStatus = dsl.selectFrom(PHASE)
+                .where(PHASE.ID.eq(tower.getPhaseId()))
+                .fetchOptional()
+                .orElseThrow(() -> new RuntimeException("Phase not found"))
+                .getReraStatus();
+
+
         if(request.getName() != null) tower.setName(request.getName());
         if(request.getTotalFloors() != null) tower.setTotalFloors(UShort.valueOf(request.getTotalFloors()));
         if(request.getMaxUnitsPerFloor() != null) tower.setMaxUnitsPerFloor(UByte.valueOf(request.getMaxUnitsPerFloor()));
         if(request.getOc() != null) tower.setOc(request.getOc() ? (byte) 1 : (byte) 0);
-        if(request.getReraStatus() != null) tower.setReraStatus(request.getReraStatus());
-        if(request.getConstructionStatus() != null) tower.setConstructionStatus(request.getConstructionStatus());
+        if(request.getReraStatus() != null){
+            if(phaseReraStatus.equalsIgnoreCase("approved"))
+                tower.setReraStatus("approved");
+            else
+                tower.setReraStatus(String.valueOf(request.getReraStatus()));
+        }
+        if(request.getConstructionStatus() != null) tower.setConstructionStatus(String.valueOf(request.getConstructionStatus()));
         if(request.getInventoryType() != null) tower.setInventoryType(request.getInventoryType());
         if(request.getConditions() != null) tower.setConditions(request.getConditions());
 
