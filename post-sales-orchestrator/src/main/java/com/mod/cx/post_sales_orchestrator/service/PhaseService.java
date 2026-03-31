@@ -2,7 +2,9 @@ package com.mod.cx.post_sales_orchestrator.service;
 
 import com.mod.cx.post_sales_orchestrator.dto.PhaseRequest;
 import com.mod.cx.post_sales_orchestrator.jooq.tables.daos.PhaseDao;
+import com.mod.cx.post_sales_orchestrator.jooq.tables.pojos.Block;
 import com.mod.cx.post_sales_orchestrator.jooq.tables.pojos.Phase;
+import com.mod.cx.post_sales_orchestrator.jooq.tables.pojos.Tower;
 import com.mod.cx.post_sales_orchestrator.jooq.tables.records.PhaseRecord;
 import com.mod.cx.post_sales_orchestrator.service.base.BaseServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +12,9 @@ import org.jooq.DAO;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
 
-import static com.mod.cx.post_sales_orchestrator.jooq.Tables.PHASE;
+import java.util.List;
+
+import static com.mod.cx.post_sales_orchestrator.jooq.Tables.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +56,26 @@ public class PhaseService extends BaseServiceImpl<PhaseRecord, Phase, Long> {
                 .orElseThrow(() -> new RuntimeException("Phase not found"));
     }
 
+    public List<Tower> getPhaseTowers(Long phaseId , int page, int size) {
+        int offset = page * size;
+
+        return dsl.selectFrom(TOWER)
+                .where(TOWER.PHASE_ID.eq(phaseId))
+                .limit(size)
+                .offset(offset)
+                .fetchInto(Tower.class);
+    }
+
+    public List<Block> getPhaseBlocks(Long phaseId , int page, int size) {
+        int offset = page * size;
+
+        return dsl.selectFrom(BLOCK)
+                .where(BLOCK.PHASE_ID.eq(phaseId))
+                .limit(size)
+                .offset(offset)
+                .fetchInto(Block.class);
+    }
+
     public void deletePhase(Long id) {
         int deletedRows = dsl.deleteFrom(PHASE)
                 .where(PHASE.ID.eq(id))
@@ -68,7 +92,19 @@ public class PhaseService extends BaseServiceImpl<PhaseRecord, Phase, Long> {
                 .fetchOptional()
                 .orElseThrow(() -> new RuntimeException("Phase not found"));
 
-        if(request.getName() != null) phase.setName(request.getName());
+        if (request.getName() != null && !request.getName().equalsIgnoreCase(phase.getName())) {
+
+            boolean nameExists = dsl.fetchExists(
+                    dsl.selectFrom(PHASE)
+                            .where(PHASE.PROJECT_ID.eq(phase.getProjectId()))
+                            .and(PHASE.NAME.equalIgnoreCase(request.getName()))
+            );
+
+            if (nameExists) {
+                throw new RuntimeException("A phase with this name already exists for this project");
+            }
+            phase.setName(request.getName());
+        }
         if(request.getReraType() != null) phase.setReraType(request.getReraType());
         if(request.getOc() != null) phase.setOc(request.getOc());
         if(request.getReraStatus() != null) phase.setReraStatus(request.getReraStatus());
